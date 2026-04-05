@@ -28,7 +28,6 @@ public class AppUserController {
         } catch (ResponseStatusException e) {
             return switch ((HttpStatus) e.getStatusCode()) {
                 case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).build();
-//                case BAD_REQUEST -> ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
                 default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             };
         }
