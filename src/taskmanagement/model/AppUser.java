@@ -3,6 +3,7 @@ package taskmanagement.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -20,4 +21,7 @@ public class AppUser {
     @NotBlank
     @Size(min = 6)
     private String password;
+
+    @OneToMany(mappedBy = "author")
+    private java.util.List<Task> tasks;
 }

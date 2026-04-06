@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalValidationExHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleValidationExeptions(MethodArgumentNotValidException ex) {
+//        return new ResponseEntity<>(ex.getMessage().isEmpty() ? "Invalid input data" : ex.getMessage(), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>("Invalid input data", HttpStatus.BAD_REQUEST);
     }
 }
