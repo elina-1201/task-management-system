@@ -24,7 +24,7 @@ public class TaskController {
     public ResponseEntity<List<TaskDTO>> getTasks(@RequestParam(required = false) String author) {
         return author == null ?
                 new ResponseEntity<>(service.getAllTasks(), HttpStatus.OK) :
-                new ResponseEntity<>(service.getAuthorsTasks(author), HttpStatus.OK);
+                new ResponseEntity<>(service.getAuthorsTasks(author.toLowerCase()), HttpStatus.OK);
     }
 
     @PostMapping("/tasks")

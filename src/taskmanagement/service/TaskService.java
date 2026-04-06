@@ -26,10 +26,10 @@ public class TaskService {
     }
 
     public List<TaskDTO> getAllTasks() {
-        return TaskDTO.toDTOList(taskRepo.findAll());
+        return TaskDTO.toDTOList(taskRepo.findAllByOrderByIdDesc());
     }
 
     public List<TaskDTO> getAuthorsTasks(String authorEmail) {
-        return TaskDTO.toDTOList(taskRepo.findByAuthorEmail(authorEmail));
+        return TaskDTO.toDTOList(taskRepo.findByAuthorEmailOrderByIdDesc(authorEmail));
     }
 }
