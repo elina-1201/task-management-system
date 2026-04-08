@@ -17,8 +17,9 @@ public class SecurityConfig {
         return http
                 .httpBasic(Customizer.withDefaults()) // enable basic HTTP authentication
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/tasks/**").authenticated() // require authentication for /api/tasks
                         .requestMatchers("/api/accounts").permitAll() // allow creating accounts without authentication
+                        .requestMatchers("/api/auth/token").authenticated()
+                        .requestMatchers("/api/tasks/**").authenticated() // require authentication for /api/tasks
                         .requestMatchers("/error").permitAll() // expose the /error endpoint
                         .requestMatchers("/actuator/shutdown").permitAll() // required for tests
                         .requestMatchers("/h2-console/**").permitAll() // expose H2 console
@@ -27,6 +28,7 @@ public class SecurityConfig {
                 .sessionManagement(sessions ->
                         sessions.sessionCreationPolicy(SessionCreationPolicy.STATELESS) // no session
                 )
+                .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults())) // enable JWT authentication
                 .build();
     }
 

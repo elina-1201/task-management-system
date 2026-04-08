@@ -1,8 +1,13 @@
 package taskmanagement.controller;
 
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,14 +16,17 @@ import org.springframework.web.server.ResponseStatusException;
 import taskmanagement.model.AppUser;
 import taskmanagement.service.AppUserService;
 
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api")
+@AllArgsConstructor
 public class AppUserController {
     private final AppUserService service;
-
-    public AppUserController(AppUserService appUserService) {
-        this.service = appUserService;
-    }
+    private final JwtEncoder encoder;
 
     @PostMapping("/accounts")
     public ResponseEntity<AppUser> createAccount(@Valid @RequestBody AppUser request) {
@@ -31,5 +39,22 @@ public class AppUserController {
                 default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             };
         }
+    }
+
+    @PostMapping("/auth/token")
+    public ResponseEntity<Map<String, String>> getToken(Authentication auth) {
+        List<String> authorities = auth.getAuthorities().stream()
+                .map(a -> a.getAuthority())
+                .toList();
+
+        var claimSet = JwtClaimsSet.builder()
+                .subject(auth.getName())
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(60))
+                .claim("scope", authorities)
+                .build();
+
+        String tokenValue = encoder.encode(JwtEncoderParameters.from(claimSet)).getTokenValue();
+        return new ResponseEntity<>(new HashMap<>(Map.of("token", tokenValue)), HttpStatus.OK);
     }
 }
