@@ -9,6 +9,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Entity
 public class AppUser {
@@ -23,5 +25,5 @@ public class AppUser {
     private String password;
 
     @OneToMany(mappedBy = "author")
-    private java.util.List<Task> tasks;
+    private List<Task> tasks;
 }
