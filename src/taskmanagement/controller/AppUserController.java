@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -29,22 +30,19 @@ public class AppUserController {
     private final JwtEncoder encoder;
 
     @PostMapping("/accounts")
-    public ResponseEntity<AppUser> createAccount(@Valid @RequestBody AppUser request) {
+    public ResponseEntity<?> createAccount(@Valid @RequestBody AppUser request) {
         try {
             service.addUser(request);
             return ResponseEntity.status(HttpStatus.OK).build();
         } catch (ResponseStatusException e) {
-            return switch ((HttpStatus) e.getStatusCode()) {
-                case CONFLICT -> ResponseEntity.status(HttpStatus.CONFLICT).build();
-                default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-            };
+            return new ResponseEntity<>(e.getReason(), e.getStatusCode());
         }
     }
 
     @PostMapping("/auth/token")
     public ResponseEntity<Map<String, String>> getToken(Authentication auth) {
         List<String> authorities = auth.getAuthorities().stream()
-                .map(a -> a.getAuthority())
+                .map(GrantedAuthority::getAuthority)
                 .toList();
 
         var claimSet = JwtClaimsSet.builder()

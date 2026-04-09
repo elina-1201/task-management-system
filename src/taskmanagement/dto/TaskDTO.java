@@ -18,14 +18,16 @@ public class TaskDTO {
     private String description;
     private String status;
     private String author;
+    private String assignee;
 
     public static TaskDTO toDTO(Task task){
         return new TaskDTO(
                 String.valueOf(task.getId()),
                 task.getTitle(),
                 task.getDescription(),
-                "CREATED",
-                task.getAuthor().getEmail().toLowerCase()
+                task.getStatus().name(),
+                task.getAuthor().getEmail().toLowerCase(),
+                task.getAssigneeStr()
         );
     }
 
