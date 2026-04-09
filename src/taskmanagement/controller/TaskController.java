@@ -47,9 +47,10 @@ public class TaskController {
 
     @PutMapping("/tasks/{taskId}/assign")
     public ResponseEntity<?> assignTask(@PathVariable Long taskId,
-                                        @Valid @RequestBody AssignRequest request) {
+                                        @RequestBody AssignRequest request,
+                                        Authentication auth) {
         try {
-            TaskDTO taskDTO = service.assignTask(taskId, request.assignee());
+            TaskDTO taskDTO = service.assignTask(taskId, request.assignee(), auth);
             return new ResponseEntity<>(taskDTO, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             return new ResponseEntity<>(e.getReason(), e.getStatusCode());

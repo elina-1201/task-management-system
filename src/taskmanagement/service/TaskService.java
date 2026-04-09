@@ -51,12 +51,22 @@ public class TaskService {
 //                .toList();
     }
 
-    public TaskDTO assignTask(Long taskId, String assigneeEmail) {
+    public TaskDTO assignTask(Long taskId, String assigneeEmail, Authentication authentication) {
         Task task = taskRepo.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
-        AppUser assignee = userRepo.findByEmail(assigneeEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        task.setAssignee(assignee);
+        boolean isTaskAuthor = authentication.getName().equals(task.getAuthor().getEmail());
+
+        if(!isTaskAuthor){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author can assign the task");
+        }
+
+        if (assigneeEmail.equals("none")) {
+            task.setAssignee(null);
+        } else {
+            AppUser assignee = userRepo.findByEmail(assigneeEmail)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+            task.setAssignee(assignee);
+        }
 
         return TaskDTO.toDTO(taskRepo.save(task));
     }
@@ -68,7 +78,8 @@ public class TaskService {
         boolean isAuthor = auth.getName().equals(task.getAuthor().getEmail());
         boolean isAssignee = auth.getName().equals(task.getAssigneeStr());
 
-        if(!isAuthor && !isAssignee) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author or assignee can update the task status");
+        if (!isAuthor && !isAssignee)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author or assignee can update the task status");
 
         task.setStatus(status);
         return TaskDTO.toDTO(taskRepo.save(task));
