@@ -1,5 +1,6 @@
 package taskmanagement.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,21 +13,17 @@ import taskmanagement.model.AppUserAdapter;
 import taskmanagement.repository.AppUserRepo;
 
 @Service
+@AllArgsConstructor
 public class AppUserService implements UserDetailsService {
     private final AppUserRepo repository;
-    private final PasswordEncoder encoder;
-
-    public AppUserService(AppUserRepo appUserRepo, PasswordEncoder passwordEncoder) {
-        this.repository = appUserRepo;
-        this.encoder = passwordEncoder;
-    }
+    private final PasswordEncoder passwordEncoder;
 
     public void addUser(AppUser request){
         if(repository.existsByEmail(request.getEmail().toLowerCase())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT);
         }
 
-        String encodedPassword = encoder.encode(request.getPassword());
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
         request.setPassword(encodedPassword);
         repository.save(request);
     }

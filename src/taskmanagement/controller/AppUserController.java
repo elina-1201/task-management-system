@@ -27,7 +27,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class AppUserController {
     private final AppUserService service;
-    private final JwtEncoder encoder;
+    private final JwtEncoder jwtEncoder;
 
     @PostMapping("/accounts")
     public ResponseEntity<?> createAccount(@Valid @RequestBody AppUser request) {
@@ -52,7 +52,7 @@ public class AppUserController {
                 .claim("scope", authorities)
                 .build();
 
-        String tokenValue = encoder.encode(JwtEncoderParameters.from(claimSet)).getTokenValue();
+        String tokenValue = jwtEncoder.encode(JwtEncoderParameters.from(claimSet)).getTokenValue();
         return new ResponseEntity<>(new HashMap<>(Map.of("token", tokenValue)), HttpStatus.OK);
     }
 }

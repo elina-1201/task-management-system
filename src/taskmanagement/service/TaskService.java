@@ -1,5 +1,6 @@
 package taskmanagement.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -14,14 +15,10 @@ import taskmanagement.repository.TaskRepo;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class TaskService {
     private final TaskRepo taskRepo;
     private final AppUserRepo userRepo;
-
-    public TaskService(TaskRepo repository, AppUserRepo userRepo) {
-        this.taskRepo = repository;
-        this.userRepo = userRepo;
-    }
 
     public Task addTask(Task request, String authorEmail) {
         AppUser author = userRepo.findByEmail(authorEmail)
@@ -44,11 +41,6 @@ public class TaskService {
 
     public List<TaskDTO> getAuthorsAndAssigneesTasks(String authorEmail, String assigneeEmail) {
         return TaskDTO.toDTOList(taskRepo.findByAuthorEmailAndAssigneeEmailOrderByIdDesc(authorEmail, assigneeEmail));
-//        List<TaskDTO> authorsTasks = TaskDTO.toDTOList(taskRepo.findByAuthorEmailOrderByIdDesc(authorEmail));
-//        List<TaskDTO> assigneesTasks = TaskDTO.toDTOList(taskRepo.findByAssigneeEmailOrderByIdDesc(assigneeEmail));
-//        return authorsTasks.stream()
-//                .filter(assigneesTasks::contains)
-//                .toList();
     }
 
     public TaskDTO assignTask(Long taskId, String assigneeEmail, Authentication authentication) {
