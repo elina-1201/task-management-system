@@ -1,9 +1,6 @@
-package taskmanagement.model;
+package taskmanagement.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -26,4 +23,7 @@ public class AppUser {
 
     @OneToMany(mappedBy = "author")
     private List<Task> tasks;
+
+    @OneToMany(mappedBy = "author")
+    private List<Comment> comments;
 }

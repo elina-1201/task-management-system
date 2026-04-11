@@ -1,7 +1,7 @@
 package taskmanagement.repository;
 
 import org.springframework.data.repository.CrudRepository;
-import taskmanagement.model.AppUser;
+import taskmanagement.entity.AppUser;
 
 import java.util.Optional;
 

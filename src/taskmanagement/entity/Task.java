@@ -1,4 +1,4 @@
-package taskmanagement.model;
+package taskmanagement.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

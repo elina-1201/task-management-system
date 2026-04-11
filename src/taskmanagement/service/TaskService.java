@@ -5,11 +5,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import taskmanagement.dto.CommentDTO;
 import taskmanagement.dto.TaskDTO;
+import taskmanagement.entity.Comment;
 import taskmanagement.enums.TaskStatus;
-import taskmanagement.model.AppUser;
-import taskmanagement.model.Task;
+import taskmanagement.entity.AppUser;
+import taskmanagement.entity.Task;
 import taskmanagement.repository.AppUserRepo;
+import taskmanagement.repository.CommentRepo;
 import taskmanagement.repository.TaskRepo;
 
 import java.util.List;
@@ -19,6 +22,7 @@ import java.util.List;
 public class TaskService {
     private final TaskRepo taskRepo;
     private final AppUserRepo userRepo;
+    private final CommentRepo commentRepo;
 
     public Task addTask(Task request, String authorEmail) {
         AppUser author = userRepo.findByEmail(authorEmail)
@@ -75,5 +79,21 @@ public class TaskService {
 
         task.setStatus(status);
         return TaskDTO.toDTO(taskRepo.save(task));
+    }
+
+    public CommentDTO addComment(Long taskId, String commentText, Authentication auth) {
+        Task task = taskRepo.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+
+        AppUser author = userRepo.findByEmail(auth.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        Comment comment = Comment.builder()
+                .comment(commentText)
+                .task(task)
+                .author(author)
+                .build();
+
+        return CommentDTO.toDTO(commentRepo.save(comment));
     }
 }

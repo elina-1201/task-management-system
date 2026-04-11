@@ -8,8 +8,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import taskmanagement.model.AppUser;
-import taskmanagement.model.AppUserAdapter;
+import taskmanagement.entity.AppUser;
+import taskmanagement.entity.AppUserAdapter;
 import taskmanagement.repository.AppUserRepo;
 
 @Service

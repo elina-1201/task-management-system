@@ -1,4 +1,4 @@
-package taskmanagement.model;
+package taskmanagement.entity;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -1,15 +1,18 @@
 package taskmanagement.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import taskmanagement.dto.CommentDTO;
 import taskmanagement.dto.TaskDTO;
-import taskmanagement.model.Task;
+import taskmanagement.entity.Task;
 import taskmanagement.requestbody.AssignRequest;
+import taskmanagement.requestbody.CommentRequest;
 import taskmanagement.requestbody.StatusUpdateRequest;
 import taskmanagement.service.TaskService;
 
@@ -64,6 +67,18 @@ public class TaskController {
         try {
             TaskDTO taskDTO = service.updateStatus(taskId, request.status(), authentication);
             return new ResponseEntity<>(taskDTO, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            return new ResponseEntity<>(e.getReason(), e.getStatusCode());
+        }
+    }
+
+    @PostMapping("/tasks/{taskId}/comments")
+    public ResponseEntity<?> addComment(@PathVariable Long taskId,
+                                        @Valid @RequestBody CommentRequest request,
+                                        Authentication authentication) {
+        try {
+            CommentDTO commentDTO = service.addComment(taskId, request.text(), authentication);
+            return new ResponseEntity<>(commentDTO, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             return new ResponseEntity<>(e.getReason(), e.getStatusCode());
         }

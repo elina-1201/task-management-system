@@ -1,7 +1,7 @@
 package taskmanagement.repository;
 
 import org.springframework.data.repository.CrudRepository;
-import taskmanagement.model.Task;
+import taskmanagement.entity.Task;
 
 public interface TaskRepo extends CrudRepository<Task, Long> {
     Iterable<Task> findAllByOrderByIdDesc();
