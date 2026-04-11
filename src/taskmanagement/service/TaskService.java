@@ -33,25 +33,26 @@ public class TaskService {
     }
 
     public List<TaskDTO> getAllTasks() {
-        return TaskDTO.toDTOList(taskRepo.findAllByOrderByIdDesc());
+        return TaskDTO.toDTOList(taskRepo.findAllDesc());
     }
 
     public List<TaskDTO> getAuthorsTasks(String authorEmail) {
-        return TaskDTO.toDTOList(taskRepo.findByAuthorEmailOrderByIdDesc(authorEmail));
+        return TaskDTO.toDTOList(taskRepo.findByAuthorDesc(authorEmail));
     }
 
     public List<TaskDTO> getAssigneesTasks(String assigneeEmail) {
-        return TaskDTO.toDTOList(taskRepo.findByAssigneeEmailOrderByIdDesc(assigneeEmail));
+        return TaskDTO.toDTOList(taskRepo.findByAssigneeDesc(assigneeEmail));
     }
 
     public List<TaskDTO> getAuthorsAndAssigneesTasks(String authorEmail, String assigneeEmail) {
-        return TaskDTO.toDTOList(taskRepo.findByAuthorEmailAndAssigneeEmailOrderByIdDesc(authorEmail, assigneeEmail));
+        return TaskDTO.toDTOList(taskRepo.findByAuthorAndAssigneeDesc(authorEmail, assigneeEmail));
     }
 
-    public TaskDTO assignTask(Long taskId, String assigneeEmail, Authentication authentication) {
+    public Task assignTask(Long taskId, String assigneeEmail, Authentication authentication) {
         Task task = taskRepo.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
-        boolean isTaskAuthor = authentication.getName().equals(task.getAuthor().getEmail());
+//        boolean isTaskAuthor = authentication.getName().equals(task.getAuthor().getEmail());
+        boolean isTaskAuthor = authentication.getName().equals(task.getAuthor());
 
         if(!isTaskAuthor){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author can assign the task");
@@ -64,22 +65,23 @@ public class TaskService {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
             task.setAssignee(assignee);
         }
-
-        return TaskDTO.toDTO(taskRepo.save(task));
+        
+        return taskRepo.save(task);
     }
 
-    public TaskDTO updateStatus(Long taskId, TaskStatus status, Authentication auth) {
+    public Task updateStatus(Long taskId, TaskStatus status, Authentication auth) {
         Task task = taskRepo.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
 
-        boolean isAuthor = auth.getName().equals(task.getAuthor().getEmail());
-        boolean isAssignee = auth.getName().equals(task.getAssigneeStr());
+//        boolean isAuthor = auth.getName().equals(task.getAuthor().getEmail());
+        boolean isAuthor = auth.getName().equals(task.getAuthor());
+        boolean isAssignee = auth.getName().equals(task.getAssignee());
 
         if (!isAuthor && !isAssignee)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author or assignee can update the task status");
 
         task.setStatus(status);
-        return TaskDTO.toDTO(taskRepo.save(task));
+        return taskRepo.save(task);
     }
 
     public CommentDTO addComment(Long taskId, String commentText, Authentication auth) {

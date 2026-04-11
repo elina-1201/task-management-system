@@ -9,6 +9,9 @@ import lombok.Data;
 import lombok.Getter;
 import taskmanagement.enums.TaskStatus;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @Entity
 public class Task {
@@ -22,18 +25,32 @@ public class Task {
     @Enumerated(EnumType.STRING)
     private TaskStatus status = TaskStatus.CREATED;
 
-    @JsonIgnore
+    @Getter(AccessLevel.NONE)
+    @ManyToOne
+    @JoinColumn(name="author_id")
+    private AppUser author;
+
+    @JsonProperty("author")
+    public String getAuthor() {
+        return author.getEmail();
+    }
+
     @Getter(AccessLevel.NONE)
     @ManyToOne
     @JoinColumn(name="assignee_id")
     private AppUser assignee;
 
-    @ManyToOne
-    @JoinColumn(name="user_id")
-    private AppUser author;
-
     @JsonProperty("assignee")
-    public String getAssigneeStr() {
+    public String getAssignee() {
         return assignee == null ? "none" : assignee.getEmail();
+    }
+
+    @Getter(AccessLevel.NONE)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    @JsonProperty("total_comments")
+    public Long getCommentsCount(){
+        return (long) comments.size();
     }
 }

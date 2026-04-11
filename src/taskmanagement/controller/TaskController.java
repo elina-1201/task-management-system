@@ -8,9 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import taskmanagement.dto.CommentDTO;
-import taskmanagement.dto.CommentProjection;
 import taskmanagement.dto.TaskDTO;
-import taskmanagement.entity.Comment;
 import taskmanagement.entity.Task;
 import taskmanagement.repository.CommentRepo;
 import taskmanagement.requestbody.AssignRequest;
@@ -46,9 +44,9 @@ public class TaskController {
     }
 
     @PostMapping("/tasks")
-    public ResponseEntity<TaskDTO> createTask(@Valid @RequestBody Task request, Authentication auth) {
-        TaskDTO taskDTO = TaskDTO.toDTO(service.addTask(request, auth.getName()));
-        return new ResponseEntity<>(taskDTO, HttpStatus.OK);
+    public ResponseEntity<Task> createTask(@Valid @RequestBody Task request, Authentication auth) {
+        Task task = service.addTask(request, auth.getName());
+        return new ResponseEntity<>(task, HttpStatus.OK);
     }
 
     @PutMapping("/tasks/{taskId}/assign")
@@ -56,8 +54,8 @@ public class TaskController {
                                         @RequestBody AssignRequest request,
                                         Authentication auth) {
         try {
-            TaskDTO taskDTO = service.assignTask(taskId, request.assignee(), auth);
-            return new ResponseEntity<>(taskDTO, HttpStatus.OK);
+            Task task = service.assignTask(taskId, request.assignee(), auth);
+            return new ResponseEntity<>(task, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             return new ResponseEntity<>(e.getReason(), e.getStatusCode());
         }
@@ -68,8 +66,8 @@ public class TaskController {
                                           @Valid @RequestBody StatusUpdateRequest request,
                                           Authentication authentication) {
         try {
-            TaskDTO taskDTO = service.updateStatus(taskId, request.status(), authentication);
-            return new ResponseEntity<>(taskDTO, HttpStatus.OK);
+            Task task = service.updateStatus(taskId, request.status(), authentication);
+            return new ResponseEntity<>(task, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             return new ResponseEntity<>(e.getReason(), e.getStatusCode());
         }
