@@ -3,9 +3,7 @@ package taskmanagement.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import taskmanagement.entity.Comment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +11,6 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
 public class CommentDTO {
 
     @JsonProperty("id")
@@ -25,16 +22,16 @@ public class CommentDTO {
     @JsonProperty("author")
     private String author;
 
-    public static CommentDTO toDTO(Comment comment) {
+    public static CommentDTO toDTO(CommentProjection comment) {
         return new CommentDTO(
-                String.valueOf(comment.getId()),
-                String.valueOf(comment.getTask().getId()),
-                comment.getComment(),
-                comment.getAuthor().getEmail().toLowerCase()
+                String.valueOf(comment.id()),
+                String.valueOf(comment.taskId()),
+                comment.comment(),
+                comment.author()
         );
     }
 
-    public static List<CommentDTO> toDTOList(Iterable<Comment> comments) {
+    public static List<CommentDTO> toDTOList(List<CommentProjection> comments) {
         List<CommentDTO> dtos = new ArrayList<>();
         comments.forEach(comment -> dtos.add(toDTO(comment)));
         return dtos;

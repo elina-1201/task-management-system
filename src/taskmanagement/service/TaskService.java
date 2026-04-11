@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import taskmanagement.dto.CommentDTO;
+import taskmanagement.dto.CommentProjection;
 import taskmanagement.dto.TaskDTO;
 import taskmanagement.entity.Comment;
 import taskmanagement.enums.TaskStatus;
@@ -94,6 +95,18 @@ public class TaskService {
                 .author(author)
                 .build();
 
-        return CommentDTO.toDTO(commentRepo.save(comment));
+        commentRepo.save(comment);
+
+        return new CommentDTO(
+                comment.getId().toString(),
+                taskId.toString(),
+                comment.getComment(),
+                author.getEmail()
+                );
     }
+//
+    public List<CommentDTO> getComments(Long taskId) {
+        return CommentDTO.toDTOList(commentRepo.findByTaskIdOrderByIdDesc(taskId));
+    }
+
 }

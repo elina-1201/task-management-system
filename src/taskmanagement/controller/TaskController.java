@@ -1,7 +1,6 @@
 package taskmanagement.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,8 +8,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import taskmanagement.dto.CommentDTO;
+import taskmanagement.dto.CommentProjection;
 import taskmanagement.dto.TaskDTO;
+import taskmanagement.entity.Comment;
 import taskmanagement.entity.Task;
+import taskmanagement.repository.CommentRepo;
 import taskmanagement.requestbody.AssignRequest;
 import taskmanagement.requestbody.CommentRequest;
 import taskmanagement.requestbody.StatusUpdateRequest;
@@ -23,6 +25,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TaskController {
     private final TaskService service;
+    private final CommentRepo commentRepo;
 
     @GetMapping("/tasks")
     public ResponseEntity<List<TaskDTO>> getTasks(@RequestParam(required = false) String author,
@@ -79,6 +82,16 @@ public class TaskController {
         try {
             CommentDTO commentDTO = service.addComment(taskId, request.text(), authentication);
             return new ResponseEntity<>(commentDTO, HttpStatus.OK);
+        } catch (ResponseStatusException e) {
+            return new ResponseEntity<>(e.getReason(), e.getStatusCode());
+        }
+    }
+
+    @GetMapping("/tasks/{taskId}/comments")
+    public ResponseEntity<?> getComments(@PathVariable Long taskId) {
+        try {
+            List<CommentDTO> comments = service.getComments(taskId);
+            return new ResponseEntity<>(comments, HttpStatus.OK);
         } catch (ResponseStatusException e) {
             return new ResponseEntity<>(e.getReason(), e.getStatusCode());
         }
