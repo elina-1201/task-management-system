@@ -24,27 +24,6 @@ public class TaskDTO {
     @JsonProperty("total_comments")
     private Long comments;
 
-//    public void setId(Long id) {
-//        this.id = String.valueOf(id);
-//    }
-//
-//    public void setStatus(TaskStatus status) {
-//        this.status = status.name();
-//    }
-
-//    private static TaskDTO build (Long id, String title, String description, TaskStatus status,
-//                                 String authorEmail, String assigneeEmail, Long comments) {
-//        TaskDTO dto = new TaskDTO();
-//        dto.setId(id);
-//        dto.setTitle(title);
-//        dto.setDescription(description);
-//        dto.setStatus(status);
-//        dto.setAuthor(authorEmail);
-//        dto.setAssignee(assigneeEmail == null ? "none" : assigneeEmail);
-//        dto.setComments(comments == null ? 0L : comments);
-//        return dto;
-//    }
-
     public static TaskDTO toDTO(TaskProjection task) {
         return new TaskDTO(
                 String.valueOf(task.getId()),

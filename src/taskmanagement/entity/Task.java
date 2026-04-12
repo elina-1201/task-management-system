@@ -7,25 +7,32 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 import taskmanagement.enums.TaskStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Setter
 @Entity
 public class Task {
     @Id
     @GeneratedValue
     private Long id;
+    public String getId() {
+        return String.valueOf(id);
+    }
+
+    @Getter
     @NotBlank
     private String title;
+    @Getter
     @NotBlank
     private String description;
+    @Getter
     @Enumerated(EnumType.STRING)
     private TaskStatus status = TaskStatus.CREATED;
 
-    @Getter(AccessLevel.NONE)
     @ManyToOne
     @JoinColumn(name="author_id")
     private AppUser author;
@@ -35,7 +42,6 @@ public class Task {
         return author.getEmail();
     }
 
-    @Getter(AccessLevel.NONE)
     @ManyToOne
     @JoinColumn(name="assignee_id")
     private AppUser assignee;
@@ -45,7 +51,6 @@ public class Task {
         return assignee == null ? "none" : assignee.getEmail();
     }
 
-    @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
