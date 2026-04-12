@@ -2,8 +2,6 @@ package taskmanagement.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import taskmanagement.entity.Task;
-import taskmanagement.enums.TaskStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,11 +11,9 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class TaskDTO {
-    @Setter(AccessLevel.NONE)
     private String id;
     private String title;
     private String description;
-    @Setter(AccessLevel.NONE)
     private String status;
     private String author;
     private String assignee;
@@ -25,13 +21,14 @@ public class TaskDTO {
     private Long comments;
 
     public static TaskDTO toDTO(TaskProjection task) {
+        String assignee = task.getAssignee() == null ? "none" : task.getAssignee();
         return new TaskDTO(
                 String.valueOf(task.getId()),
                 task.getTitle(),
                 task.getDescription(),
                 task.getStatus().name(),
                 task.getAuthor(),
-                task.getAssignee(),
+                assignee,
                 task.getComments()
         );
     }

@@ -6,7 +6,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import taskmanagement.dto.CommentDTO;
-import taskmanagement.dto.CommentProjection;
 import taskmanagement.dto.TaskDTO;
 import taskmanagement.entity.Comment;
 import taskmanagement.enums.TaskStatus;
@@ -51,7 +50,6 @@ public class TaskService {
     public Task assignTask(Long taskId, String assigneeEmail, Authentication authentication) {
         Task task = taskRepo.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
-//        boolean isTaskAuthor = authentication.getName().equals(task.getAuthor().getEmail());
         boolean isTaskAuthor = authentication.getName().equals(task.getAuthor());
 
         if(!isTaskAuthor){
@@ -73,7 +71,6 @@ public class TaskService {
         Task task = taskRepo.findById(taskId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
 
-//        boolean isAuthor = auth.getName().equals(task.getAuthor().getEmail());
         boolean isAuthor = auth.getName().equals(task.getAuthor());
         boolean isAssignee = auth.getName().equals(task.getAssignee());
 
@@ -106,9 +103,12 @@ public class TaskService {
                 author.getEmail()
                 );
     }
-//
-    public List<CommentDTO> getComments(Long taskId) {
-        return CommentDTO.toDTOList(commentRepo.findByTaskIdOrderByIdDesc(taskId));
-    }
 
+    public List<CommentDTO> getComments(Long taskId) {
+        if(!taskRepo.existsById(taskId)){
+             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
+        }
+
+        return CommentDTO.toDTOList( commentRepo.findByTaskIdOrderByIdDesc(taskId));
+    }
 }

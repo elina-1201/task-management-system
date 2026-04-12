@@ -22,5 +22,4 @@ public interface CommentRepo extends CrudRepository<Comment, Long> {
             order by c.id desc
             """)
     List<CommentProjection> findByTaskIdOrderByIdDesc(Long taskId);
-//    Iterable<Comment> findByTaskIdOrderByIdDesc(Long taskId);
 }
