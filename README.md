@@ -42,3 +42,6 @@ To run the application locally:
 3. Run the application with gradle (if you have gradle installed):
    ```bash
    gradle bootRun
+
+## 📖 API Documentation
+For detailed information about the endpoints, request/response formats, and authentication, please refer to the [API Documentation](API.md).
