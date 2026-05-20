@@ -19,6 +19,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/accounts").permitAll() // allow creating accounts without authentication
                         .requestMatchers("/api/auth/token").authenticated()
+                        .requestMatchers("/api/auth/refresh").permitAll()
                         .requestMatchers("/api/tasks/**").authenticated() // require authentication for /api/tasks
                         .requestMatchers("/error").permitAll() // expose the /error endpoint
                         .requestMatchers("/actuator/shutdown").permitAll() // required for tests
@@ -37,3 +38,5 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
+

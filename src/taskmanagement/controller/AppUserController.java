@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +30,7 @@ import java.util.Map;
 public class AppUserController {
     private final AppUserService service;
     private final JwtEncoder jwtEncoder;
+    private final JwtDecoder jwtDecoder;
 
     @PostMapping("/accounts")
     public ResponseEntity<?> createAccount(@Valid @RequestBody AppUser request) {
@@ -45,14 +48,80 @@ public class AppUserController {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        var claimSet = JwtClaimsSet.builder()
+        // access token (short-lived)
+        var accessClaims = JwtClaimsSet.builder()
                 .subject(auth.getName())
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plusSeconds(60))
                 .claim("scope", authorities)
+                .claim("token_type", "access")
                 .build();
 
-        String tokenValue = jwtEncoder.encode(JwtEncoderParameters.from(claimSet)).getTokenValue();
-        return new ResponseEntity<>(new HashMap<>(Map.of("token", tokenValue)), HttpStatus.OK);
+        String accessToken = jwtEncoder.encode(JwtEncoderParameters.from(accessClaims)).getTokenValue();
+
+        // refresh token (longer lived)
+        var refreshClaims = JwtClaimsSet.builder()
+                .subject(auth.getName())
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(60 * 60 * 24 * 7)) // 7 days
+                .claim("scope", authorities)
+                .claim("token_type", "refresh")
+                .build();
+
+        String refreshToken = jwtEncoder.encode(JwtEncoderParameters.from(refreshClaims)).getTokenValue();
+
+        return new ResponseEntity<>(new HashMap<>(Map.of(
+                "token", accessToken,
+                "refresh_token", refreshToken
+        )), HttpStatus.OK);
+    }
+
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<Map<String, String>> refreshToken(@RequestBody Map<String, String> body) {
+        var incoming = body.get("refresh_token");
+        if (incoming == null || incoming.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "refresh_token is required");
+        }
+
+        try {
+            var jwt = jwtDecoder.decode(incoming);
+
+            Object tt = jwt.getClaim("token_type");
+            if (tt == null || !"refresh".equals(tt.toString())) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token");
+            }
+
+            var subject = jwt.getSubject();
+            List<String> authorities = jwt.getClaimAsStringList("scope");
+
+            // issue new access token
+            var accessClaims = JwtClaimsSet.builder()
+                    .subject(subject)
+                    .issuedAt(Instant.now())
+                    .expiresAt(Instant.now().plusSeconds(60))
+                    .claim("scope", authorities)
+                    .claim("token_type", "access")
+                    .build();
+
+            String accessToken = jwtEncoder.encode(JwtEncoderParameters.from(accessClaims)).getTokenValue();
+
+            // issue new refresh token (rotation)
+            var refreshClaims = JwtClaimsSet.builder()
+                    .subject(subject)
+                    .issuedAt(Instant.now())
+                    .expiresAt(Instant.now().plusSeconds(60 * 60 * 24 * 7))
+                    .claim("scope", authorities)
+                    .claim("token_type", "refresh")
+                    .build();
+
+            String refreshToken = jwtEncoder.encode(JwtEncoderParameters.from(refreshClaims)).getTokenValue();
+
+            return new ResponseEntity<>(new HashMap<>(Map.of(
+                    "token", accessToken,
+                    "refresh_token", refreshToken
+            )), HttpStatus.OK);
+        } catch (JwtException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid refresh token", e);
+        }
     }
 }
