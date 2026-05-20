@@ -42,6 +42,18 @@ public class AppUserController {
         }
     }
 
+    String getJwtToken(String subject, String type, int expiration, List<String> authorities) {
+        var accessClaims = JwtClaimsSet.builder()
+                .subject(subject)
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(expiration))
+                .claim("scope", authorities)
+                .claim("token_type", type)
+                .build();
+
+        return jwtEncoder.encode(JwtEncoderParameters.from(accessClaims)).getTokenValue();
+    }
+
     @PostMapping("/auth/token")
     public ResponseEntity<Map<String, String>> getToken(Authentication auth) {
         List<String> authorities = auth.getAuthorities().stream()
@@ -49,27 +61,10 @@ public class AppUserController {
                 .toList();
 
         // access token (short-lived)
-        var accessClaims = JwtClaimsSet.builder()
-                .subject(auth.getName())
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(60))
-                .claim("scope", authorities)
-                .claim("token_type", "access")
-                .build();
-
-        String accessToken = jwtEncoder.encode(JwtEncoderParameters.from(accessClaims)).getTokenValue();
+        String accessToken = getJwtToken(auth.getName(), "access", 60, authorities);
 
         // refresh token (longer lived)
-        var refreshClaims = JwtClaimsSet.builder()
-                .subject(auth.getName())
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(60 * 60 * 24 * 7)) // 7 days
-                .claim("scope", authorities)
-                .claim("token_type", "refresh")
-                .build();
-
-        String refreshToken = jwtEncoder.encode(JwtEncoderParameters.from(refreshClaims)).getTokenValue();
-
+        String refreshToken = getJwtToken(auth.getName(), "refresh", 60 * 60 * 24 * 7, authorities);
         return new ResponseEntity<>(new HashMap<>(Map.of(
                 "token", accessToken,
                 "refresh_token", refreshToken
@@ -95,26 +90,11 @@ public class AppUserController {
             List<String> authorities = jwt.getClaimAsStringList("scope");
 
             // issue new access token
-            var accessClaims = JwtClaimsSet.builder()
-                    .subject(subject)
-                    .issuedAt(Instant.now())
-                    .expiresAt(Instant.now().plusSeconds(60))
-                    .claim("scope", authorities)
-                    .claim("token_type", "access")
-                    .build();
-
-            String accessToken = jwtEncoder.encode(JwtEncoderParameters.from(accessClaims)).getTokenValue();
+            String accessToken = getJwtToken(subject, "access", 60, authorities);
 
             // issue new refresh token (rotation)
-            var refreshClaims = JwtClaimsSet.builder()
-                    .subject(subject)
-                    .issuedAt(Instant.now())
-                    .expiresAt(Instant.now().plusSeconds(60 * 60 * 24 * 7))
-                    .claim("scope", authorities)
-                    .claim("token_type", "refresh")
-                    .build();
+            String refreshToken = getJwtToken(subject, "refresh",60 * 60 * 24 * 7 , authorities);
 
-            String refreshToken = jwtEncoder.encode(JwtEncoderParameters.from(refreshClaims)).getTokenValue();
 
             return new ResponseEntity<>(new HashMap<>(Map.of(
                     "token", accessToken,
